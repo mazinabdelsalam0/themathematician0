@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" style="scroll-behavior: smooth;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>The Mathematician | Premium Math Platform</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+
+    <!-- MathJax Configuration -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$'], ['\\[', '\\]']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <!-- Tailwind Configuration -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        background: '#050b14',
+                        primary: '#4f46e5',
+                        secondary: '#0ea5e9',
+                        accent: '#8b5cf6',
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'float': 'floatMath 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        floatMath: {
+                            '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+                            '50%': { transform: 'translateY(-20px) rotate(10deg)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS (Glassmorphism & Fixes) -->
+    <style>
+        body {
+            /* Global Background: Deep dark blue fading into black */
+            background: linear-gradient(145deg, #071324 0%, #02050a 100%);
+            background-attachment: fixed;
+            color: #ffffff;
+            overflow-x: hidden !important;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(79, 70, 229, 0.5); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(79, 70, 229, 0.8); }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(20, 30, 50, 0.25);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .glass-nav {
+            background: rgba(5, 11, 20, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card-hover:hover {
+            transform: translateY(-6px);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.2);
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            background: rgba(0, 0, 0, 0.5);
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.2);
+            outline: none;
+        }
+
+        /* Text Gradients */
+        .text-gradient {
+            background: linear-gradient(to right, #38bdf8, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* SweetAlert Glass Override */
+        .swal2-popup {
+            background: rgba(10, 18, 32, 0.85) !important;
+            backdrop-filter: blur(20px) !important;
+            border: 1px solid rgba(255,255,255,0.1) !important;
+            border-radius: 1.5rem !important;
+            color: white !important;
+        }
+        .swal2-title, .swal2-html-container { color: white !important; }
+
+        /* Animations */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .animate-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+    </style>
+</head>
+<body class="relative selection:bg-indigo-500/30">
+
+    <!-- Fixed Background Glows (Fixes Horizontal Scroll & Adds Aesthetic) -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute top-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-indigo-600/10 rounded-full mix-blend-screen filter blur-[100px] animate-pulse-slow"></div>
+        <div class="absolute bottom-[-10%] left-[-5%] w-[40vw] h-[40vw] bg-cyan-600/10 rounded-full mix-blend-screen filter blur-[100px] animate-pulse-slow delay-700"></div>
+        <div class="absolute top-[30%] left-[20%] w-[30vw] h-[30vw] bg-purple-600/10 rounded-full mix-blend-screen filter blur-[120px] animate-blob"></div>
+    </div>
+
+    <!-- Intro Page (Untouched as requested) -->
+    <div id="intro-page" class="fixed inset-0 z-[100] bg-[#050b14] overflow-y-auto overflow-x-hidden transition-all duration-1000 ease-in-out">
+        <!-- Floating Math Symbols -->
+        <div class="fixed inset-0 pointer-events-none overflow-hidden">
+            <div class="absolute top-20 right-10 md:right-20 text-blue-500/20 text-6xl md:text-8xl font-serif animate-float select-none">∫</div>
+            <div class="absolute bottom-32 right-10 md:right-1/4 text-indigo-500/20 text-5xl md:text-7xl font-serif animate-float delay-100 select-none">π</div>
+            <div class="absolute top-40 left-10 md:left-1/4 text-teal-500/20 text-6xl md:text-8xl font-serif animate-float delay-200 select-none">∞</div>
+            <div class="absolute bottom-20 left-10 md:left-20 text-purple-500/20 text-5xl md:text-7xl font-serif animate-float delay-300 select-none">√</div>
+            <div class="absolute top-1/3 left-5 md:left-10 text-cyan-500/20 text-5xl md:text-6xl font-serif animate-float delay-500 select-none">∑</div>
+            <div class="absolute bottom-1/4 left-1/3 text-purple-500/20 text-4xl md:text-5xl font-serif animate-float delay-700 select-none">Δ</div>
+            <div class="absolute top-1/4 right-1/3 text-blue-500/20 text-5xl md:text-7xl font-serif animate-float delay-150 select-none">θ</div>
+            <div class="absolute bottom-10 right-1/3 text-teal-500/20 text-6xl md:text-8xl font-serif animate-float delay-1000 select-none">Ω</div>
+            <div class="absolute top-10 left-1/2 text-indigo-500/20 text-4xl md:text-5xl font-serif animate-float delay-75 select-none">β</div>
+        </div>
+
+        <div class="min-h-screen flex items-center justify-center py-16 md:py-0">
+            <div class="container mx-auto px-6 relative z-10 flex flex-col-reverse md:flex-row items-center justify-between gap-10 md:gap-16 w-full max-w-7xl">
+                
+                <!-- Text Section -->
+                <div class="md:w-1/2 text-center md:text-left mt-8 md:mt-0 flex flex-col justify-center">
+                    <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-6 leading-tight relative z-10">
+                        Welcome to <br>
+                        <span class="text-gradient font-heading text-5xl sm:text-6xl lg:text-7xl mt-2 inline-block drop-shadow-lg">The Mathematician</span>
+                    </h1>
+                    <p class="text-base sm:text-lg md:text-xl text-gray-300 mb-10 leading-relaxed font-light relative z-10">
+                        Mathematics here is not just complex numbers and rules. <br>
+                        <span class="text-cyan-400 font-bold">Your studies and future are safe with us.</span> Discover the joy of academic learning with modern interactive methods.
+                    </p>
+                    <div>
+                        <button onclick="enterSite()" class="relative z-10 w-full sm:w-auto group inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-300 bg-gradient-to-r from-indigo-600 to-cyan-600 rounded-full hover:from-indigo-500 hover:to-cyan-500 shadow-[0_0_30px_rgba(79,70,229,0.4)] hover:shadow-[0_0_50px_rgba(79,70,229,0.7)] hover:-translate-y-1">
+                            <span>Start Your Journey</span>
+                            <i data-lucide="arrow-right" class="w-5 h-5 ml-3 transform group-hover:translate-x-2 transition-transform"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Image Section -->
+                <div class="md:w-1/2 flex justify-center">
+                    <div class="relative w-full max-w-[280px] sm:max-w-md lg:max-w-lg group">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500 to-indigo-500 rounded-[2.5rem] blur-2xl opacity-40 animate-pulse group-hover:opacity-60 transition-opacity duration-500"></div>
+                        <img src="https://i.postimg.cc/fTSjDHCf/Chat-GPT-Image-5-mayw-2026-09-25-44-m.png" alt="Math Concept" class="relative z-10 w-full h-auto rounded-[2.5rem] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transform hover:scale-105 transition-all duration-700 object-cover">
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Container -->
+    <div id="main-app-container" class="hidden opacity-0 transition-opacity duration-1000 ease-in-out relative z-10">
+
+        <!-- Navbar -->
+        <nav class="glass-nav sticky top-0 z-50 w-full transition-all duration-300">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
+                
+                <!-- Logo -->
+                <div class="flex items-center gap-3 cursor-pointer group" onclick="switchPage('main-content')">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-cyan-400 p-[2px] shadow-[0_0_15px_rgba(79,70,229,0.3)] group-hover:shadow-[0_0_25px_rgba(79,70,229,0.6)] transition-all">
+                        <div class="w-full h-full bg-dark-900 rounded-full flex items-center justify-center overflow-hidden">
+                            <img src="https://i.postimg.cc/5tX2rPdS/Whats-App-Image-2026-05-08-at-6-01-03-PM.jpg" alt="Brainex" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                    <span class="font-heading font-bold text-xl tracking-tight text-white">The Mathematician</span>
+                </div>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center gap-8" id="nav-auth-group">
+                    <a href="#" onclick="switchPage('main-content')" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Home</a>
+                    <a href="javascript:void(0)" onclick="goToAbout()" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">About</a>
+                    <a href="#" onclick="loadQuizzesPage()" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Quizzes</a>
+                    
+                    <div id="guest-buttons" class="flex items-center gap-4">
+                        <a href="#" onclick="switchPage('login-page')" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Login</a>
+                        <button onclick="switchPage('signup-page')" class="bg-white/10 hover:bg-white/20 border border-white/10 text-white px-6 py-2 rounded-full text-sm font-semibold backdrop-blur-md transition-all transform hover:scale-105">
+                            Join Now
+                        </button>
+                    </div>
+
+                    <button id="user-profile" class="hidden items-center gap-2 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-400 hover:to-purple-500 text-white px-6 py-2 rounded-full text-sm font-bold shadow-[0_0_20px_rgba(99,102,241,0.4)] transition-all transform hover:-translate-y-1" onclick="switchPage('dashboard-page')">
+                        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                        Dashboard
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Toggle -->
+                <div class="md:hidden z-50 relative">
+                    <button id="mobile-menu-btn" class="p-2 text-slate-300 hover:text-white focus:outline-none bg-white/5 rounded-lg border border-white/10 backdrop-blur-md">
+                        <i data-lucide="menu" class="w-5 h-5 transition-transform duration-300"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Mobile Sidebar -->
+        <div id="mobile-menu-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+        <div id="mobile-menu" class="fixed top-0 right-0 h-full w-64 glass-panel border-l border-white/5 z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+            <div class="p-6 flex justify-end">
+                <button id="close-menu-btn" class="p-2 text-slate-400 hover:text-white bg-white/5 rounded-lg border border-white/10">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="flex flex-col gap-4 px-8 mt-4">
+                <a href="#" onclick="switchPage('main-content')" class="text-base font-medium text-slate-300 hover:text-white transition-colors border-b border-white/5 pb-3">Home</a>
+                <a href="javascript:void(0)" onclick="goToAbout()" class="text-base font-medium text-slate-300 hover:text-white transition-colors border-b border-white/5 pb-3">About</a>
+                <a href="#" onclick="loadQuizzesPage()" class="text-base font-medium text-slate-300 hover:text-white transition-colors border-b border-white/5 pb-3">Quizzes</a>
+                <a href="#" onclick="switchPage('login-page')" class="text-base font-medium text-slate-300 hover:text-white transition-colors border-b border-white/5 pb-3">Login</a>
+                <button onclick="switchPage('signup-page')" class="bg-gradient-to-r from-indigo-600 to-cyan-600 text-white px-6 py-3 rounded-xl text-center font-semibold shadow-lg mt-4">
+                    Join Now
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Home Page -->
+        <main id="main-content" class="page-section hidden opacity-0 translate-y-10 transition-all duration-500 ease-out relative z-10">
+            
+            <!-- Hero Wrapper with Background Image -->
+            <div class="relative w-full">
+                <!-- Background Image & Gradient Overlay -->
+                <div class="absolute inset-0 z-0 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=2070&auto=format&fit=crop" alt="Mathematics Background" class="w-full h-full object-cover opacity-25 mix-blend-luminosity">
+                    <!-- Smooth fade from header down to the body's natural color -->
+                    <div class="absolute inset-0 bg-gradient-to-b from-[#071324]/40 via-[#071324]/80 to-[#071324]"></div>
+                </div>
+
+                <section class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 md:pt-32 pb-24 md:pb-36 text-center relative z-10 animate-on-scroll">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 backdrop-blur-md">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                        <span class="text-xs font-bold tracking-wider text-cyan-100 uppercase">#1 University Math Platform</span>
+                    </div>
+
+                    <h1 class="hero-heading text-5xl sm:text-6xl md:text-7xl lg:text-[5.5rem] leading-[1.1] mb-6 drop-shadow-2xl">
+                        <span class="block text-white mb-2">Master Mathematics</span>
+                        <span class="block text-gradient">Like Never Before</span>
+                    </h1>
+
+                    <p class="text-slate-300 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+                        Expert-led courses designed for university students. Deepen your understanding of complex theories and excel in your academic journey.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <button onclick="switchPage('all-courses-page')" class="w-full sm:w-auto bg-white hover:bg-gray-100 text-slate-900 px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all transform hover:-translate-y-1">
+                            <i data-lucide="rocket" class="w-5 h-5"></i>
+                            Start Learning Now
+                        </button>
+                        <button onclick="switchPage('video-page')" class="w-full sm:w-auto glass-card hover:bg-white/10 text-white px-8 py-4 rounded-full font-bold flex items-center justify-center gap-2 transition-all transform hover:-translate-y-1 border border-white/20">
+                            <i data-lucide="play" class="w-5 h-5"></i>
+                            Watch Demo
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Stats Section -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 glass-panel border-x-0 sm:border-x sm:rounded-3xl mb-20 animate-on-scroll relative z-10 -mt-10">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/10">
+                    <div class="flex flex-col items-center justify-center gap-3">
+                        <div class="p-3 bg-indigo-500/20 rounded-xl"><i data-lucide="rocket" class="w-6 h-6 text-indigo-400"></i></div>
+                        <div>
+                            <div class="font-heading font-bold text-3xl text-white mb-1">10k+</div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active Students</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center gap-3">
+                        <div class="p-3 bg-cyan-500/20 rounded-xl"><i data-lucide="calculator" class="w-6 h-6 text-cyan-400"></i></div>
+                        <div>
+                            <div class="font-heading font-bold text-3xl text-white mb-1">3</div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Math Courses</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center gap-3">
+                        <div class="p-3 bg-emerald-500/20 rounded-xl"><i data-lucide="check-circle-2" class="w-6 h-6 text-emerald-400"></i></div>
+                        <div>
+                            <div class="font-heading font-bold text-3xl text-white mb-1">98%</div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Success Rate</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center gap-3">
+                        <div class="p-3 bg-purple-500/20 rounded-xl"><i data-lucide="users" class="w-6 h-6 text-purple-400"></i></div>
+                        <div>
+                            <div class="font-heading font-bold text-3xl text-white mb-1">24/7</div>
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Support</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- About Section -->
+            <section id="about" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative z-10">
+                <div class="text-center mb-16 animate-on-scroll">
+                    <h2 class="font-heading font-bold text-4xl text-white mb-4">Why Choose Us?</h2>
+                    <p class="text-slate-400 text-lg max-w-2xl mx-auto font-light">We combine traditional teaching excellence with modern technology to deliver the best learning experience.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="glass-card glass-card-hover p-8 rounded-3xl animate-on-scroll delay-100">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-6">
+                            <i data-lucide="brain-circuit" class="w-7 h-7 text-purple-400"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-xl text-white mb-3">Interactive Learning</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Engage with dynamic content that adapts to your learning pace and makes complex topics digestible.</p>
+                    </div>
+                    <div class="glass-card glass-card-hover p-8 rounded-3xl animate-on-scroll delay-200">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center mb-6">
+                            <i data-lucide="shield-check" class="w-7 h-7 text-emerald-400"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-xl text-white mb-3">Verified Certificates</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Earn recognized certificates upon completion of your courses to boost your academic profile.</p>
+                    </div>
+                    <div class="glass-card glass-card-hover p-8 rounded-3xl animate-on-scroll delay-300">
+                        <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-6">
+                            <i data-lucide="users" class="w-7 h-7 text-cyan-400"></i>
+                        </div>
+                        <h3 class="font-heading font-bold text-xl text-white mb-3">Community Support</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Join thousands of students, share knowledge, and get help whenever you need it from experts.</p>
+                    </div>
+                </div>
+            </section>
+            
+            <footer class="glass-panel border-x-0 border-b-0 pt-16 pb-8 mt-12 animate-on-scroll relative z-10">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 mb-12">
+                        <div class="max-w-sm">
+                            <div class="flex items-center gap-3 mb-4">
+                                <div class="w-10 h-10 rounded-full overflow-hidden bg-slate-900 border border-white/10">
+                                    <img src="https://i.postimg.cc/5tX2rPdS/Whats-App-Image-2026-05-08-at-6-01-03-PM.jpg" alt="The Mathematician" class="w-full h-full object-cover">
+                                </div>
+                                <h3 class="font-heading font-bold text-2xl text-white">The Mathematician</h3>
+                            </div>
+                            <p class="text-slate-400 text-sm leading-relaxed mb-6 font-light">
+                                Empowering students through mathematics. Master complex concepts with ease and build your bright future.
+                            </p>
+                            <div class="flex items-center gap-4">
+                                <a href="#" class="text-slate-400 hover:text-white transition-colors bg-white/5 p-2 rounded-lg border border-white/5 hover:bg-white/10"><i data-lucide="facebook" class="w-4 h-4"></i></a>
+                                <a href="#" class="text-slate-400 hover:text-white transition-colors bg-white/5 p-2 rounded-lg border border-white/5 hover:bg-white/10"><i data-lucide="mail" class="w-4 h-4"></i></a>
+                                <a href="#" class="text-slate-400 hover:text-white transition-colors bg-white/5 p-2 rounded-lg border border-white/5 hover:bg-white/10"><i data-lucide="youtube" class="w-4 h-4"></i></a>
+                            </div>
+                        </div>
+                        <div class="text-left md:text-right">
+                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">DEVELOPED BY</div>
+                            <div class="font-heading font-bold text-lg text-white">The Mathematician</div>
+                            
+                        </div>
+                    </div>
+                    <div class="text-center pt-8 border-t border-white/5">
+                        <p class="text-slate-500 text-sm">&copy; 2026 The Mathematitian. All rights reserved.</p>
+                    </div>
+                </div>
+            </footer>
+        </main>
+
+        <!-- All Courses Page -->
+        <div id="all-courses-page" class="page-section hidden opacity-0 translate-y-10 transition-all duration-500 ease-out relative z-10 min-h-[80vh] px-4 py-12">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4 animate-on-scroll">
+                    <div class="max-w-2xl">
+                        <h2 class="font-heading font-bold text-4xl text-white mb-4">Our Premium Courses</h2>
+                        <p class="text-slate-400 text-lg font-light">Discover our handpicked collection of courses and start your academic journey successfully.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Course 1 -->
+                    <div class="glass-card rounded-3xl overflow-hidden flex flex-col glass-card-hover animate-on-scroll delay-100">
+                        <div class="relative h-48 w-full bg-slate-900 overflow-hidden group">
+                            <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=800&auto=format&fit=crop" alt="Calculus" class="w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0a1220] via-transparent to-transparent"></div>
+                            <div class="absolute top-4 left-4 w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg">
+                                <svg viewBox="0 0 24 24" class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            </div>
+                            <div class="absolute top-4 right-4 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold px-3 py-1.5 rounded-full tracking-wider uppercase shadow-lg">
+                                DETAILED
+                            </div>
+                        </div>
+                        <div class="p-6 flex-1 flex flex-col">
+                            <div class="flex items-center gap-1 mb-3">
+                                <div class="flex text-amber-400">
+                                    <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                                </div>
+                                <span class="text-xs text-slate-400 ml-1 font-medium">(5.0)</span>
+                            </div>
+                            <h3 class="font-heading font-bold text-2xl text-white mb-3">Integration Detailed Explanation and Worksheets</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-1 font-light">
+                                A complete, detailed explanation of the Integration 132 curriculum from A to Z.
+                            </p>
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+                                <div class="font-heading font-bold text-xl text-emerald-400 flex items-baseline gap-1">
+                                    Free
+                                </div>
+                                <button onclick="viewCourse(1)" class="bg-white hover:bg-gray-200 text-slate-900 font-bold text-sm px-5 py-2 rounded-full flex items-center gap-1 transition-colors">
+                                    Enter <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course 2 -->
+                    <div class="glass-card rounded-3xl overflow-hidden flex flex-col glass-card-hover animate-on-scroll delay-200">
+                        <div class="relative h-48 w-full bg-slate-900 overflow-hidden group">
+                            <img src="https://images.unsplash.com/photo-1596495578065-6e0763fa1178?q=80&w=800&auto=format&fit=crop" alt="Integration Revision" class="w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity duration-500 grayscale mix-blend-luminosity">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0a1220] via-transparent to-transparent"></div>
+                            <div class="absolute top-4 left-4 w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg">
+                                <svg viewBox="0 0 24 24" class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m12 8-4 4 4 4M16 12H9"/></svg>
+                            </div>
+                            <div class="absolute top-4 right-4 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold px-3 py-1.5 rounded-full tracking-wider uppercase shadow-lg">
+                                REVISION
+                            </div>
+                        </div>
+                        <div class="p-6 flex-1 flex flex-col">
+                            <div class="flex items-center gap-1 mb-3">
+                                <div class="flex text-amber-400">
+                                    <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                                </div>
+                                <span class="text-xs text-slate-400 ml-1 font-medium">(5.0)</span>
+                            </div>
+                            <h3 class="font-heading font-bold text-2xl text-white mb-3">Integration Final Revisions</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-1 font-light">
+                                Targeted revision for Integration, summarizing key formulas and solving complex problems.
+                            </p>
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+                                <div class="font-heading font-bold text-xl text-emerald-400 flex items-baseline gap-1">
+                                    Free
+                                </div>
+                                <button onclick="viewCourse(2)" class="bg-white hover:bg-gray-200 text-slate-900 font-bold text-sm px-5 py-2 rounded-full flex items-center gap-1 transition-colors">
+                                    Enter <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course 3 -->
+                    <div class="glass-card rounded-3xl overflow-hidden flex flex-col glass-card-hover animate-on-scroll delay-300">
+                        <div class="relative h-48 w-full bg-slate-900 overflow-hidden group">
+                            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop" alt="Integration Detailed" class="w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity duration-500 hue-rotate-[160deg] saturate-50">
+                            <div class="absolute inset-0 bg-gradient-to-t from-[#0a1220] via-transparent to-transparent"></div>
+                            <div class="absolute top-4 left-4 w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center shadow-lg">
+                                <i data-lucide="trending-up" class="w-5 h-5 text-emerald-400"></i>
+                            </div>
+                            <div class="absolute top-4 right-4 bg-white/10 backdrop-blur-md border border-white/20 text-white text-[10px] font-bold px-3 py-1.5 rounded-full tracking-wider uppercase shadow-lg">
+                                Revision
+                            </div>
+                        </div>
+                        <div class="p-6 flex-1 flex flex-col">
+                            <div class="flex items-center gap-1 mb-3">
+                                <div class="flex text-amber-400">
+                                    <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i><i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                                </div>
+                                <span class="text-xs text-slate-400 ml-1 font-medium">(5.0)</span>
+                            </div>
+                            <h3 class="font-heading font-bold text-2xl text-white mb-3">Differentiation Final Revision</h3>
+                            <p class="text-slate-400 text-sm leading-relaxed mb-6 flex-1 font-light">
+                                Comprehensive revision course covering all major Calculus 131 topics to ensure you ace the finals.
+                            </p>
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-white/10">
+                                <div class="font-heading font-bold text-xl text-emerald-400 flex items-baseline gap-1">
+                                    Free
+                                </div>
+                                <button onclick="viewCourse(3)" class="bg-white hover:bg-gray-200 text-slate-900 font-bold text-sm px-5 py-2 rounded-full flex items-center gap-1 transition-colors">
+                                    Enter <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Course Details Page -->
+        <div id="course-details-page" class="page-section hidden opacity-0 translate-y-10 transition-all duration-500 ease-out relative z-10 min-h-[80vh] px-4 py-12">
+            <div class="max-w-5xl mx-auto">
+                <div class="glass-card p-8 rounded-[2rem] shadow-2xl animate-on-scroll">
+                    <div class="flex items-center justify-between mb-8 pb-6 border-b border-white/10">
+                        <h2 id="course-detail-title" class="text-3xl md:text-4xl font-bold text-white font-heading">Course Name</h2>
+                        <button onclick="switchPage('all-courses-page')" class="text-slate-400 hover:text-white flex items-center gap-2 text-sm transition-colors bg-white/5 px-4 py-2 rounded-lg border border-white/10">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Courses
+                        </button>
+                    </div>
+
+                    <div id="course-parts-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <div id="video-player-wrapper" class="hidden aspect-video bg-black rounded-2xl overflow-hidden border border-white/10 shadow-[0_0_30px_rgba(0,0,0,0.5)] mt-10">
+                        <iframe id="video-iframe" class="w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quizzes Page -->
+        <div id="quizzes-page" class="page-section hidden opacity-0 translate-y-10 transition-all duration-500 ease-out relative z-10 min-h-[80vh] px-4 py-12">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
+                    <div class="max-w-2xl">
+                        <h2 class="font-heading font-bold text-4xl text-white mb-4">Interactive Quizzes</h2>
+                        <p class="text-slate-400 text-lg font-light">Test your knowledge and verify your understanding of the lectures through smart interactive quizzes.</p>
+                    </div>
+                </div>
+
+                <div id="quizzes-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Quiz Page -->
+        <div id="active-quiz-page" class="page-section hidden opacity-0 transition-all duration-500 ease-out relative z-20 min-h-screen bg-[#050b14] flex flex-col select-none">
+            
+            <!-- Safe Header -->
+            <div class="glass-nav p-4 sticky top-0 z-50">
+                <div class="max-w-5xl mx-auto flex justify-between items-center">
+                    <div class="flex items-center gap-4">
+                        <div class="text-white font-bold text-lg md:text-xl truncate w-32 md:w-auto font-heading tracking-wide" id="active-quiz-title">Loading...</div>
+                        <span class="bg-indigo-500/20 text-indigo-300 text-xs px-3 py-1.5 rounded-lg border border-indigo-500/30 font-mono tracking-widest" id="question-tracker">-- / --</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-rose-400 font-mono font-bold text-xl bg-black/40 px-4 py-2 rounded-lg border border-rose-500/30 shadow-inner">
+                        <i data-lucide="timer" class="w-5 h-5"></i>
+                        <span id="quiz-timer">00:00</span>
+                    </div>
+                </div>
+                <div class="max-w-5xl mx-auto bg-black/50 h-1.5 mt-4 rounded-full overflow-hidden border border-white/5">
+                    <div id="quiz-progress-bar" class="bg-gradient-to-r from-cyan-400 to-indigo-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+            </div>
+
+            <div class="flex-grow container mx-auto px-4 py-8 flex flex-col items-center justify-center relative z-10">
+                <div class="w-full max-w-3xl glass-card p-6 md:p-10 rounded-[2rem] shadow-2xl relative">
+                    
+                    <div id="question-content-area" class="mb-8 min-h-[200px]">
+                        <h3 class="text-xl md:text-2xl font-bold text-white leading-relaxed mb-6 font-sans" id="question-text">...</h3>
+                        
+                        <img id="question-image" src="" class="hidden w-full max-h-72 object-contain rounded-xl border border-white/10 mb-6 bg-black/50 mx-auto">
+                        
+                        <div id="options-container" class="space-y-3"></div>
+
+                        <div id="essay-input-container" class="hidden">
+                            <textarea id="essay-answer" class="glass-input w-full rounded-xl p-5 h-32 resize-none custom-scrollbar text-lg font-sans" placeholder="Write your answer here..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-6 border-t border-white/10 mt-auto">
+                        <button onclick="prevQuestion()" id="btn-prev" class="px-6 py-3 rounded-xl bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-all border border-white/10 font-bold flex items-center gap-2">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i> Previous
+                        </button>
+
+                        <button onclick="nextQuestion()" id="btn-next" class="px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold shadow-[0_0_20px_rgba(79,70,229,0.4)] transition transform active:scale-95 flex items-center gap-2">
+                            Next <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+
+                        <button onclick="finishQuiz()" id="btn-finish" class="hidden px-8 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-[0_0_20px_rgba(16,185,129,0.4)] transition transform active:scale-95 flex items-center gap-2 animate-pulse">
+                            Submit Answers <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Video Page -->
+        <div id="video-page" class="page-section hidden opacity-0 translate-y-10 transition-all duration-500 ease-out relative z-10 min-h-[80vh] px-4 py-12">
+            <div class="max-w-4xl mx-auto text-center animate-on-scroll">
+                <h2 class="text-3xl font-bold text-white mb-4 font-heading">Platform Introduction</h2>
+                <p class="text-slate-400 mb-10 font-light">Watch this video to learn about Brainex features and how we help you excel.</p>
+                <div class="aspect-video glass-card rounded-[2rem] overflow-hidden flex items-center justify-center shadow-2xl relative group cursor-pointer border-white/10">
+                    <div class="absolute inset-0 bg-indigo-500/10 group-hover:bg-indigo-500/20 transition-colors duration-500"></div>
+                    <i data-lucide="play-circle" class="w-24 h-24 text-white/50 group-hover:text-white transition-all transform group-hover:scale-110 duration-500"></i>
+                    <p class="absolute bottom-10 text-slate-400/70 font-light tracking-wide">Introductory video will be uploaded here</p>
+                </div>
+                <button onclick="switchPage('main-content')" class="mt-10 bg-white/5 hover:bg-white/10 text-white px-8 py-3 rounded-full font-semibold transition-all border border-white/10 flex items-center justify-center gap-2 mx-auto">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Home 
+                </button>
+            </div>
+        </div>
+
+        <!-- Auth Pages (Signup/Login) -->
+        <div id="signup-page" class="page-section hidden opacity-0 translate-y-10 transition-all duration-500 ease-out relative z-20 min-h-[80vh] flex items-center justify-center px-4 py-12">
+            <div class="glass-card p-10 rounded-[2rem] w-full max-w-md shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl"></div>
+                <h2 class="text-3xl font-bold text-white text-center mb-2 font-heading relative z-10">Create Account</h2>
+                <p class="text-slate-400 text-center mb-8 text-sm font-light relative z-10">Join Brainex today and start learning.</p>
+                
+                <form class="space-y-4 relative z-10" onsubmit="event.preventDefault(); registerUser();">
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <input type="text" id="reg-fname" placeholder="First Name" required class="glass-input w-full rounded-xl px-5 py-3.5 text-sm">
+                        <input type="text" id="reg-lname" placeholder="Last Name" required class="glass-input w-full rounded-xl px-5 py-3.5 text-sm">
+                    </div>
+                    <input type="email" id="reg-email" placeholder="Email Address" required class="glass-input w-full rounded-xl px-5 py-3.5 text-sm">
+                    <input type="tel" id="reg-phone" placeholder="Phone Number" required class="glass-input w-full rounded-xl px-5 py-3.5 text-sm">
+                    <input type="password" id="reg-pass" placeholder="Password (Min 6 chars)" required minlength="6" class="glass-input w-full rounded-xl px-5 py-3.5 text-sm">
+                    <input type="password" id="reg-confirm" placeholder="Confirm Password" required minlength="6" class="glass-input w-full rounded-xl px-5 py-3.5 text-sm">
+                    <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold py-3.5 rounded-xl transition-all mt-4 shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:-translate-y-0.5">
+                        Sign Up
+                    </button>
+                </form>
+                <p class="text-center text-sm text-slate-400 mt-8 relative z-10">
+                    Already have an account? <a href="#" onclick="switchPage('login-page')" class="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline">Log In</a>
+                </p>
+            </div>
+        </div>
+
+        <div id="login-page" class="page-section hidden opacity-0 translate-y-10 transition-all duration-500 ease-out relative z-20 min-h-[80vh] flex items-center justify-center px-4 py-12">
+            <div class="glass-card p-10 rounded-[2rem] w-full max-w-md shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-32 h-32 bg-cyan-500/20 rounded-full blur-2xl"></div>
+                <h2 class="text-3xl font-bold text-white text-center mb-2 font-heading relative z-10">Welcome Back</h2>
+                <p class="text-slate-400 text-center mb-8 text-sm font-light relative z-10">Log in to your Brainex account.</p>
+                
+                <form class="space-y-4 relative z-10" onsubmit="event.preventDefault(); loginUser();">
+                    <input type="text" id="login-email" placeholder="Email Address" required class="glass-input w-full rounded-xl px-5 py-3.5 text-sm">
+                    <input type="password" id="login-pass" placeholder="Password" required class="glass-input w-full rounded-xl px-5 py-3.5 text-sm">
+                    <div class="flex justify-end mt-2">
+                        <a href="#" class="text-xs text-cyan-400 hover:text-cyan-300 transition-colors">Forgot Password?</a>
+                    </div>
+                    <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold py-3.5 rounded-xl transition-all mt-4 shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:-translate-y-0.5">
+                        Log In
+                    </button>
+                </form>
+                <p class="text-center text-sm text-slate-400 mt-8 relative z-10">
+                    Don't have an account? <a href="#" onclick="switchPage('signup-page')" class="text-cyan-400 hover:text-cyan-300 font-semibold hover:underline">Sign Up</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboard-page" class="page-section hidden opacity-0 translate-y-10 transition-all duration-500 ease-out relative z-20 min-h-[80vh] px-4 py-12">
+            <div class="max-w-4xl mx-auto">
+                <div class="glass-card p-10 rounded-[2rem] shadow-2xl animate-on-scroll">
+                    <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-10 pb-8 border-b border-white/10 gap-6">
+                        <div>
+                            <h2 class="text-3xl md:text-4xl font-bold text-white font-heading mb-2">Welcome, <span id="dash-user-name" class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">Student</span></h2>
+                            <p class="text-slate-400 font-light text-sm">Here you can track your lessons and quiz results.</p>
+                        </div>
+                        <button onclick="logoutUser()" class="flex items-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 px-6 py-2.5 rounded-xl text-sm font-bold transition-all border border-rose-500/20">
+                            <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 gap-6">
+                        <div class="bg-black/20 border border-white/5 p-12 rounded-[2rem] flex flex-col items-center justify-center text-center relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <div class="w-20 h-20 bg-indigo-500/10 rounded-full flex items-center justify-center mb-6 relative z-10">
+                                <i data-lucide="book-open" class="w-10 h-10 text-indigo-400"></i>
+                            </div>
+                            <p class="text-slate-300 mb-8 relative z-10 font-light text-lg">You can now explore available courses and quizzes to start learning.</p>
+                            <div class="flex gap-6 relative z-10">
+                                <button onclick="switchPage('all-courses-page')" class="text-cyan-400 hover:text-cyan-300 font-bold hover:underline transition-all flex items-center gap-2">
+                                    <i data-lucide="layers" class="w-4 h-4"></i> Browse Courses
+                                </button>
+                                <button onclick="loadQuizzesPage()" class="text-indigo-400 hover:text-indigo-300 font-bold hover:underline transition-all flex items-center gap-2">
+                                    <i data-lucide="brain" class="w-4 h-4"></i> Browse Quizzes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Floating WhatsApp Button -->
+        <a href="https://chat.whatsapp.com/ET0IS4n8NDJCDqQP2D07rb" target="_blank" class="fixed bottom-6 right-6 z-50 bg-emerald-500 hover:bg-emerald-400 text-white p-4 rounded-full shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all transform hover:scale-110 flex items-center justify-center group">
+            <svg viewBox="0 0 24 24" class="w-7 h-7 fill-current" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+            </svg>
+        </a>
+    </div> 
+    
+    <script>
+        lucide.createIcons();
+
+        // ============================================
+        // 1. Initial Setup and Animations
+        // ============================================
+        const introPage = document.getElementById('intro-page');
+        const mainAppContainer = document.getElementById('main-app-container');
+
+        function enterSite() {
+            introPage.style.opacity = '0';
+            introPage.style.pointerEvents = 'none'; 
+            
+            setTimeout(() => {
+                introPage.classList.add('hidden');
+                mainAppContainer.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    mainAppContainer.classList.remove('opacity-0');
+                    switchPage('main-content');
+                }, 50);
+            }, 800); 
+        }
+
+        let observer;
+        function initScrollObserver() {
+            if(observer) observer.disconnect();
+            const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+
+            observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            mainAppContainer.querySelectorAll('.animate-on-scroll').forEach((elem) => {
+                observer.observe(elem);
+            });
+        }
+
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const closeMenuBtn = document.getElementById('close-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const mobileOverlay = document.getElementById('mobile-menu-overlay');
+
+        function openMobileMenu() {
+            mobileMenu.classList.remove('translate-x-full');
+            mobileOverlay.classList.remove('opacity-0', 'pointer-events-none');
+            document.body.classList.add('overflow-hidden');
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.add('translate-x-full');
+            mobileOverlay.classList.add('opacity-0', 'pointer-events-none');
+            document.body.classList.remove('overflow-hidden');
+        }
+
+        if(mobileMenuBtn) mobileMenuBtn.addEventListener('click', openMobileMenu);
+        if(closeMenuBtn) closeMenuBtn.addEventListener('click', closeMobileMenu);
+        if(mobileOverlay) mobileOverlay.addEventListener('click', closeMobileMenu);
+
+        // Course View Function
+        const coursesData = {
+            1: {
+                title: "Integration 132 (Detailed)",
+                parts: [
+                    { name: "Simple integrations & Summations", url: "https://www.youtube.com/embed/7buByiMaxOs" },
+                    { name: "Riemann Summations", url: "https://www.youtube.com/embed/8_6oO-4jSic" },
+                    { name: "Definite Integrals", url: "https://www.youtube.com/embed/R2HvAK4TXZU" },
+                    { name: "Fundamental Theorem of Calculus (F.T.C)", url: "https://www.youtube.com/embed/GNHbWX15Azw" },
+                    { name: "Integration by Substitution", url: "https://www.youtube.com/embed/idsJyARs1Wo" },
+                    { name: "Integration by Parts & Reduction formula", url: "https://www.youtube.com/embed/CxQ8CWPFExk" },
+                    { name: "Trigonometric Integrals", url: "https://www.youtube.com/embed/I1pM6HIiHk0" },
+                    { name: "Trigonometric substitution & Arc length", url: "https://www.youtube.com/embed/j-cZQZz_Zu0" },
+                    { name: "Integration by partial fraction", url: "https://www.youtube.com/embed/lyzzGhhnNoY" },
+                    { name: "Area between curves & Improper Integrals", url: "https://www.youtube.com/embed/XG54qZoFA10" },
+                    { name: "Analytical Geometry", url: "https://www.youtube.com/embed/Da9TBkjio7w" },
+                    { name: "Conic Sections", url: "https://www.youtube.com/embed/oLVOQ-z6BHo" }
+                ]
+            },
+            2: {
+                title: "Final Revisions Integration 132",
+                parts: [
+                    { name: "Final Revision Part 1", url: "https://www.youtube.com/embed/fyhXcLD6DAs" },
+                    { name: "Final Revision Part 2", url: "" },
+                    { name: "Final Revision Part 3", url: "" }
+                ]
+            },
+            3: {
+                title: "Final Revisions Calculus 131",
+                parts: [
+                    { name: "Final Revision Part 1", url: "" },
+                    { name: "Final Revision Part 2", url: "" },
+                    { name: "Final Revision Part 3", url: "" },
+                    { name: "Final Revision Part 4", url: "" }
+                ]
+            }
+        };
+
+        function viewCourse(courseId) {
+            if (!currentUser) {
+                Swal.fire({icon: 'warning', title: 'Warning', text: 'You must login first to start this course.', background: 'rgba(10,18,32,0.9)', color: '#fff'});
+                switchPage('login-page');
+                return;
+            }
+
+            const course = coursesData[courseId];
+            const titleEl = document.getElementById('course-detail-title');
+            const containerEl = document.getElementById('course-parts-container');
+            const videoWrapper = document.getElementById('video-player-wrapper');
+            const iframeEl = document.getElementById('video-iframe');
+
+            titleEl.innerText = course.title;
+            containerEl.innerHTML = '';
+            videoWrapper.classList.add('hidden');
+            iframeEl.src = '';
+
+            course.parts.forEach((part, index) => {
+                const card = document.createElement('div');
+                card.className = "part-card glass-card p-5 rounded-2xl cursor-pointer flex items-center gap-4 hover:border-indigo-500/50 transition-colors";
+                card.innerHTML = `
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0 font-bold font-heading">${index + 1}</div>
+                    <h4 class="text-white font-semibold font-sans flex-1">${part.name}</h4>
+                    <i data-lucide="play-circle" class="w-6 h-6 text-slate-500 flex-shrink-0"></i>
+                `;
+                card.addEventListener('click', () => { playVideo(part.url, part.name); });
+                containerEl.appendChild(card);
+            });
+
+            switchPage('course-details-page');
+            lucide.createIcons();
+        }
+
+        function playVideo(url, name) {
+            const videoWrapper = document.getElementById('video-player-wrapper');
+            const iframeEl = document.getElementById('video-iframe');
+            if(!url) {
+                Swal.fire({icon: 'info', title: 'Coming Soon', text: `The video for ${name} has not been uploaded yet, stay tuned!`, background: 'rgba(10,18,32,0.9)', color: '#fff'});
+                return;
+            }
+            iframeEl.src = url;
+            videoWrapper.classList.remove('hidden');
+            videoWrapper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+
+        // ============================================
+        // 2. Supabase Configuration
+        // ============================================
+        const supabaseUrl = 'https://ycmxezwafymqhvnayngi.supabase.co';
+        const supabaseKey = 'sb_publishable_MAvdyo9Wo91xe9b8weCugQ_4tnOGzl4';
+        const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        let currentUser = null;
+        let examState = { inProgress: false };
+
+        const allPages = ['main-content', 'login-page', 'dashboard-page', 'all-courses-page', 'course-details-page', 'video-page', 'quizzes-page', 'active-quiz-page', 'signup-page'];
+
+        function goToAbout() {
+            closeMobileMenu(); 
+            const mainContent = document.getElementById('main-content');
+            if (!mainContent.classList.contains('hidden')) {
+                document.getElementById('about').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                switchPage('main-content');
+                setTimeout(() => {
+                    document.getElementById('about').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 450);
+            }
+        }
+
+        function switchPage(targetId) {
+            closeMobileMenu();
+            document.body.classList.remove('overflow-hidden');
+            
+            // Prevent leaving during exam
+            if (examState.inProgress && targetId !== 'active-quiz-page') {
+                Swal.fire({
+                    title: 'Warning!',
+                    text: 'You are in the middle of an exam. Leaving now will submit your paper and give you a zero. Are you sure?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#10b981',
+                    confirmButtonText: 'Yes, leave (Fail)',
+                    cancelButtonText: 'Continue Exam',
+                    background: 'rgba(10,18,32,0.9)', color: '#fff'
+                }).then((result) => {
+                    if (result.isConfirmed) submitExam(true);
+                });
+                return;
+            }
+
+            allPages.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && !el.classList.contains('hidden')) {
+                    el.classList.add('opacity-0', 'translate-y-10');
+                    setTimeout(() => el.classList.add('hidden'), 400);
+                }
+            });
+
+            setTimeout(() => {
+                const target = document.getElementById(targetId);
+                if (target) {
+                    target.classList.remove('hidden');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    setTimeout(() => {
+                        target.classList.remove('opacity-0', 'translate-y-10');
+                        initScrollObserver();
+                    }, 50);
+                }
+            }, 400);
+        }
+
+        // Check user session
+        window.onload = async () => {
+            const { data: { session } } = await sb.auth.getSession();
+            updateAuthUI(session);
+
+            sb.auth.onAuthStateChange((event, session) => {
+                updateAuthUI(session);
+            });
+
+            checkAbandonedExams();
+        };
+
+        function updateAuthUI(session) {
+            const guestBtns = document.getElementById('guest-buttons');
+            const profileBtn = document.getElementById('user-profile');
+            if (session) {
+                currentUser = session.user;
+                guestBtns.classList.add('hidden');
+                profileBtn.classList.remove('hidden');
+                profileBtn.classList.add('flex');
+                
+                const name = currentUser.user_metadata?.first_name || currentUser.email.split('@')[0];
+                const dashName = document.getElementById('dash-user-name');
+                if(dashName) dashName.innerText = name;
+            } else {
+                currentUser = null;
+                guestBtns.classList.remove('hidden');
+                profileBtn.classList.add('hidden');
+                profileBtn.classList.remove('flex');
+            }
+        }
+
+        async function loginUser() {
+            const inputVal = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-pass').value;
+            
+            if(!inputVal || !pass) {
+                Swal.fire({icon: 'warning', title: 'Attention', text: 'Please fill in all fields!', background: 'rgba(10,18,32,0.9)', color: '#fff'});
+                return;
+            }
+
+            const isEmail = inputVal.includes('@');
+            let authPayload = {};
+            
+            if (isEmail) {
+                authPayload = { email: inputVal, password: pass };
+            } else {
+                let phoneNum = inputVal;
+                if (phoneNum.startsWith('0')) phoneNum = '+20' + phoneNum.substring(1);
+                else if (!phoneNum.startsWith('+')) phoneNum = '+20' + phoneNum;
+                authPayload = { phone: phoneNum, password: pass };
+            }
+
+            Swal.fire({title: 'Logging in...', didOpen: () => Swal.showLoading(), background: 'rgba(10,18,32,0.9)', color: '#fff', allowOutsideClick: false});
+
+            const { data, error } = await sb.auth.signInWithPassword(authPayload);
+            
+            if (error) {
+                Swal.fire({icon: 'error', title: 'Error', text: 'Incorrect credentials!', background: 'rgba(10,18,32,0.9)', color: '#fff'});
+            } else {
+                Swal.fire({icon: 'success', title: 'Welcome Back', background: 'rgba(10,18,32,0.9)', color: '#fff', timer: 1500, showConfirmButton: false});
+                switchPage('main-content');
+            }
+        }
+
+        async function registerUser() {
+            const fName = document.getElementById('reg-fname').value.trim();
+            const lName = document.getElementById('reg-lname').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const pass = document.getElementById('reg-pass').value;
+            const confirmPass = document.getElementById('reg-confirm').value;
+
+            if (pass !== confirmPass) {
+                Swal.fire({icon: 'error', title: 'Error', text: 'Passwords do not match!', background: 'rgba(10,18,32,0.9)', color: '#fff'});
+                return;
+            }
+
+            let phoneNum = phone;
+            if (phoneNum.startsWith('0')) phoneNum = '+20' + phoneNum.substring(1);
+            else if (!phoneNum.startsWith('+')) phoneNum = '+20' + phoneNum;
+
+            Swal.fire({title: 'Creating account...', didOpen: () => Swal.showLoading(), background: 'rgba(10,18,32,0.9)', color: '#fff', allowOutsideClick: false});
+
+            const { data, error } = await sb.auth.signUp({
+                email: email,
+                password: pass,
+                phone: phoneNum,
+                options: {
+                    data: {
+                        first_name: fName,
+                        last_name: lName,
+                        phone_number: phoneNum
+                    }
+                }
+            });
+
+            if (error) {
+                Swal.fire({icon: 'error', title: 'Registration Failed', text: error.message, background: 'rgba(10,18,32,0.9)', color: '#fff'});
+            } else {
+                Swal.fire({icon: 'success', title: 'Account created successfully!', text: 'Welcome to Brainex', background: 'rgba(10,18,32,0.9)', color: '#fff', timer: 2000, showConfirmButton: false});
+                switchPage('main-content');
+            }
+        }
+        
+        async function logoutUser() {
+            await sb.auth.signOut();
+            switchPage('main-content');
+        }
+
+        // ============================================
+        // Quizzes System
+        // ============================================
+
+        function loadQuizzesPage() {
+            switchPage('quizzes-page');
+            fetchActiveQuizzes();
+        }
+
+        function getYouTubeID(url) {
+            if (!url) return null;
+            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[2].length === 11) ? match[2] : null;
+        }
+
+        async function fetchActiveQuizzes() {
+            const container = document.getElementById('quizzes-container');
+            container.innerHTML = '<div class="col-span-full text-center py-12"><i data-lucide="loader-2" class="w-10 h-10 text-indigo-500 animate-spin mx-auto mb-4"></i></div>';
+            lucide.createIcons();
+
+            const { data: quizzes, error } = await sb.from('quizzes').select('*').eq('is_active', true).order('created_at', { ascending: false });
+
+            let takenQuizIds = [];
+            if (currentUser) {
+                const {data: userResults} = await sb.from('quiz_results').select('quiz_id, score, total_score').eq('user_id', currentUser.id);
+                if (userResults) takenQuizIds = userResults;
+            }
+
+            container.innerHTML = "";
+
+            if (!quizzes || quizzes.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center text-slate-500 py-10 glass-card rounded-2xl">No quizzes available at the moment.</div>`;
+                return;
+            }
+
+            quizzes.forEach(quiz => {
+                const takenData = takenQuizIds.find(q => q.quiz_id === quiz.id);
+                const isTaken = !!takenData;
+
+                let buttonHtml = '';
+                if (isTaken) {
+                    const percent = Math.round((takenData.score / takenData.total_score) * 100);
+                    buttonHtml = `
+                    <button disabled class="w-full mt-4 bg-white/5 border border-emerald-500/30 text-emerald-400 font-bold py-3 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed opacity-80 font-sans">
+                        <span>Completed (${percent}%)</span> <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                    </button>`;
+                } else {
+                    buttonHtml = `
+                    <button onclick="initQuizSession(${quiz.id}, '${quiz.title.replace(/'/g, "\\'")}', ${quiz.time_limit})" class="w-full mt-4 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold py-3 rounded-xl shadow-[0_0_15px_rgba(79,70,229,0.4)] transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 font-sans">
+                        <span>Start Quiz</span> <i data-lucide="play" class="w-4 h-4"></i>
+                    </button>`;
+                }
+
+                let videoIframe = '';
+                const videoId = getYouTubeID(quiz.video_url);
+                if (videoId) {
+                    videoIframe = `
+                    <div class="mt-4 w-full rounded-2xl overflow-hidden border border-white/10 shadow-xl aspect-video bg-black">
+                        <iframe class="w-full h-full" src="https://www.youtube.com/embed/${videoId}?rel=0" frameborder="0" allowfullscreen></iframe>
+                    </div>`;
+                }
+
+                const html = `
+                <div class="flex flex-col w-full h-full">
+                    <div class="glass-card p-6 rounded-3xl border ${isTaken ? 'border-emerald-500/30 bg-emerald-900/10' : 'border-white/10 hover:border-indigo-500/50'} transition shadow-xl relative group flex-grow flex flex-col justify-between z-10">
+                        <div>
+                            <div class="flex justify-between items-start mb-4 font-sans">
+                                <span class="text-xs font-bold bg-black/40 ${isTaken ? 'text-emerald-400' : 'text-indigo-300'} px-3 py-1 rounded-full border border-white/10">${quiz.subject_code || 'General'}</span>
+                                <span class="text-xs text-slate-400 flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${quiz.time_limit} Mins</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-white mb-2 line-clamp-2 font-sans">${quiz.title}</h3>
+                        </div>
+                        <div>${buttonHtml}</div>
+                    </div>
+                    ${videoIframe}
+                </div>`;
+                
+                container.innerHTML += html;
+            });
+            lucide.createIcons();
+        }
+
+        // ============================================
+        // Active Quiz Management
+        // ============================================
+
+        async function initQuizSession(id, title, time) {
+            if (!currentUser) {
+                Swal.fire({icon: 'warning', title: 'Login Required', text: 'You must login to start', background: 'rgba(10,18,32,0.9)', color: '#fff'});
+                switchPage('login-page');
+                return;
+            }
+
+            Swal.fire({title: 'Verifying...', didOpen: () => Swal.showLoading(), background: 'rgba(10,18,32,0.9)', color: '#fff', allowOutsideClick: false});
+            const { data, error } = await sb.from('quiz_results').select('id').eq('user_id', currentUser.id).eq('quiz_id', id);
+            
+            if(data && data.length > 0) {
+                Swal.fire({icon: 'error', title: 'Oops', text: 'You have already taken this quiz', background: 'rgba(10,18,32,0.9)', color: '#fff'});
+                fetchActiveQuizzes();
+                return;
+            }
+
+            Swal.fire({
+                title: `Are you ready?`,
+                html: `
+                    <div class="text-left text-sm text-slate-300 space-y-2 font-sans">
+                        <p>🚫 <strong>Warning:</strong> Once started, you cannot leave or refresh.</p>
+                        <p>⚠️ Leaving means <strong>Failing (Zero score)</strong>.</p>
+                        <p>⏱️ Time Limit: <strong>${time} Mins</strong>.</p>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Start Now',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#4f46e5',
+                background: 'rgba(10,18,32,0.9)', color: '#fff'
+            }).then((res) => {
+                if(res.isConfirmed) launchQuiz(id, title, time);
+            });
+        }
+
+        async function launchQuiz(quizId, title, timeLimit) {
+            Swal.fire({title: 'Fetching questions...', didOpen: () => Swal.showLoading(), background: 'rgba(10,18,32,0.9)', color: '#fff', allowOutsideClick: false});
+
+            const { data, error } = await sb.from('questions').select('*').eq('quiz_id', quizId).order('id');
+
+            if (error || !data || data.length === 0) {
+                Swal.fire({icon: 'error', title: 'Error', text: 'No questions added to this quiz yet', background: 'rgba(10,18,32,0.9)', color: '#fff'});
+                return;
+            }
+
+            examState = {
+                questions: data,
+                currentIndex: 0,
+                answers: {},
+                inProgress: true,
+                quizId: quizId,
+                startTime: Date.now()
+            };
+
+            localStorage.setItem('bx_exam_id', quizId);
+            localStorage.setItem('bx_exam_title', title);
+            localStorage.setItem('bx_exam_total', data.length);
+
+            window.onbeforeunload = () => "Exam will be cancelled and marked as zero. Are you sure?";
+
+            document.getElementById('active-quiz-title').innerText = title;
+            startTimer(timeLimit);
+            renderQuestion();
+            
+            Swal.close();
+            switchPage('active-quiz-page');
+        }
+
+        function startTimer(minutes) {
+            let timeLeft = minutes * 60;
+            const timerEl = document.getElementById('quiz-timer');
+            
+            if (examState.timer) clearInterval(examState.timer);
+
+            examState.timer = setInterval(() => {
+                const m = Math.floor(timeLeft / 60);
+                const s = timeLeft % 60;
+                timerEl.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
+                
+                if (timeLeft < 60) timerEl.classList.add('text-rose-500', 'animate-pulse');
+
+                if (timeLeft <= 0) {
+                    clearInterval(examState.timer);
+                    submitExam(true); 
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
+        function cleanLatexInput(inputText) {
+            if (!inputText) return "";
+            return inputText.toString().replace(/\\item\s*/g, "").replace(/\\begin\{enumerate\}\s*/g, "").replace(/\\end\{enumerate\}\s*/g, "").trim();
+        }
+
+        function renderQuestion() {
+            const q = examState.questions[examState.currentIndex];
+            const total = examState.questions.length;
+            
+            document.getElementById('question-tracker').innerText = `${examState.currentIndex + 1} / ${total}`;
+            document.getElementById('quiz-progress-bar').style.width = `${((examState.currentIndex + 1) / total) * 100}%`;
+            document.getElementById('question-text').innerText = cleanLatexInput(q.question_text || "Refer to the image");
+            
+            const imgEl = document.getElementById('question-image');
+            if (q.image_url) {
+                imgEl.src = q.image_url;
+                imgEl.classList.remove('hidden');
+            } else {
+                imgEl.classList.add('hidden');
+            }
+
+            const optsDiv = document.getElementById('options-container');
+            const essayDiv = document.getElementById('essay-input-container');
+            const essayInput = document.getElementById('essay-answer');
+            
+            optsDiv.innerHTML = '';
+
+            if (q.question_type === 'mcq') {
+                essayDiv.classList.add('hidden');
+                optsDiv.classList.remove('hidden');
+                
+                [1, 2, 3, 4].forEach(num => {
+                    let txt = q[`option_${num}`]; 
+                    if (txt) {
+                        txt = cleanLatexInput(txt);
+                        const isSelected = examState.answers[q.id] === num;
+                        const activeClass = isSelected ? 'border-indigo-500 bg-indigo-500/20' : 'border-white/10 hover:border-white/30 bg-black/30';
+                        const dotClass = isSelected ? 'bg-indigo-400 border-indigo-400' : 'border-slate-500';
+
+                        optsDiv.innerHTML += `
+                        <div onclick="selectOption(${q.id}, ${num})" class="cursor-pointer p-5 rounded-2xl border ${activeClass} transition-all flex items-center gap-4 group">
+                            <div class="w-6 h-6 rounded-full border-2 ${dotClass} flex items-center justify-center flex-shrink-0">
+                                ${isSelected ? '<div class="w-2.5 h-2.5 bg-white rounded-full"></div>' : ''}
+                            </div>
+                            <span class="text-slate-300 group-hover:text-white text-lg font-medium">${txt}</span>
+                        </div>`;
+                    }
+                });
+            } else {
+                optsDiv.classList.add('hidden');
+                essayDiv.classList.remove('hidden');
+                essayInput.value = examState.answers[q.id] || '';
+                essayInput.oninput = (e) => { examState.answers[q.id] = e.target.value; };
+            }
+
+            const prevBtn = document.getElementById('btn-prev');
+            const nextBtn = document.getElementById('btn-next');
+            const finishBtn = document.getElementById('btn-finish');
+
+            prevBtn.disabled = (examState.currentIndex === 0);
+            
+            if (examState.currentIndex === total - 1) {
+                nextBtn.classList.add('hidden');
+                finishBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+                finishBtn.classList.add('hidden');
+            }
+
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise().catch((err) => console.log('MathJax Error:', err));
+            }
+        }
+
+        function selectOption(qId, num) {
+            examState.answers[qId] = num;
+            renderQuestion(); 
+        }
+
+        function nextQuestion() {
+            if (examState.currentIndex < examState.questions.length - 1) {
+                examState.currentIndex++; renderQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (examState.currentIndex > 0) {
+                examState.currentIndex--; renderQuestion();
+            }
+        }
+
+        function finishQuiz() {
+            Swal.fire({
+                title: 'Submit Answers?', 
+                text: "Make sure to review your answers, this action cannot be undone.", 
+                icon: 'warning',
+                showCancelButton: true, 
+                confirmButtonText: 'Yes, Submit', 
+                cancelButtonText: 'Review',
+                confirmButtonColor: '#10b981', 
+                background: 'rgba(10,18,32,0.9)', color: '#fff'
+            }).then((res) => {
+                if(res.isConfirmed) submitExam(false);
+            });
+        }
+
+        async function submitExam(isForced) {
+            if (examState.timer) clearInterval(examState.timer);
+            window.onbeforeunload = null;
+            examState.inProgress = false;
+
+            localStorage.removeItem('bx_exam_id');
+            localStorage.removeItem('bx_exam_title');
+            localStorage.removeItem('bx_exam_total');
+
+            let score = 0;
+            let totalMarks = examState.questions.length;
+            let reviewHtml = '<div class="space-y-4 text-left mt-6 max-h-[50vh] overflow-y-auto custom-scrollbar p-2 font-sans text-sm">';
+            
+            examState.questions.forEach((q, index) => {
+                let isCorrect = false; let studentAnsText = ""; let correctAnsText = "";
+
+                if (q.question_type === 'mcq') {
+                    const studentAnsNum = isForced ? null : examState.answers[q.id];
+                    isCorrect = (studentAnsNum == q.correct_option);
+                    if (isCorrect) score++;
+                    
+                    studentAnsText = studentAnsNum ? cleanLatexInput(q[`option_${studentAnsNum}`]) : "Not Answered";
+                    correctAnsText = cleanLatexInput(q[`option_${q.correct_option}`]);
+                } else {
+                    let ans = isForced ? "" : (examState.answers[q.id] || "").trim();
+                    isCorrect = ans.length > 0;
+                    if (isCorrect) score++;
+                    studentAnsText = ans || "Not Answered";
+                    correctAnsText = "Check the model explanation to evaluate your answer.";
+                }
+
+                reviewHtml += `
+                <div class="p-5 rounded-2xl border ${isCorrect ? 'border-emerald-500/50 bg-emerald-900/10' : 'border-rose-500/50 bg-rose-900/10'}">
+                    <p class="text-white font-bold mb-3">${index + 1}. ${cleanLatexInput(q.question_text)}</p>
+                    <div class="text-sm space-y-2">
+                        <p class="${isCorrect ? 'text-emerald-400' : 'text-rose-400'}"><i data-lucide="${isCorrect ? 'check' : 'x'}" class="w-4 h-4 inline"></i> Your Answer: ${studentAnsText}</p>
+                        ${!isCorrect && q.question_type === 'mcq' ? `<p class="text-indigo-400"><i data-lucide="check-circle" class="w-4 h-4 inline"></i> Correct: ${correctAnsText}</p>` : ''}
+                    </div>
+                    ${q.explanation ? `<div class="mt-4 p-4 bg-black/40 rounded-xl border border-white/5"><p class="text-xs text-indigo-400 font-bold mb-1">Explanation:</p><p class="text-sm text-slate-300 whitespace-pre-wrap">${cleanLatexInput(q.explanation)}</p></div>` : ''}
+                </div>`;
+            });
+            reviewHtml += '</div>';
+
+            Swal.fire({ title: 'Recording your result...', didOpen: () => Swal.showLoading(), background: 'rgba(10,18,32,0.9)', color: '#fff', allowOutsideClick: false });
+
+            const userName = currentUser.user_metadata?.first_name 
+                            ? currentUser.user_metadata.first_name + " " + (currentUser.user_metadata.last_name || "") 
+                            : currentUser.email.split('@')[0];
+
+            const { error } = await sb.from('quiz_results').insert([{
+                user_id: currentUser.id,
+                quiz_id: examState.quizId,
+                student_name: userName,
+                quiz_title: document.getElementById('active-quiz-title').innerText,
+                score: score, total_score: totalMarks 
+            }]);
+
+            if (error) {
+                Swal.fire({ icon: 'error', title: 'Error', text: error.message, background: 'rgba(10,18,32,0.9)', color: '#fff' });
+                return;
+            }
+
+            let percent = (score / totalMarks) * 100;
+            let msg = isForced ? 'Paper submitted due to timeout or escape attempt' : (percent >= 50 ? '🎉 Well Done!' : 'Unfortunately, you did not pass');
+            let color = percent >= 50 ? '#10b981' : '#f43f5e';
+
+            Swal.fire({
+                title: msg,
+                html: `
+                    <div class="text-center py-2 border-b border-white/10 pb-4 font-sans">
+                        <div class="text-6xl font-bold mb-2 font-heading" style="color:${color}">${score} <span class="text-2xl text-slate-500">/ ${totalMarks}</span></div>
+                        <p class="text-slate-400 text-sm">Review your answers:</p>
+                    </div>
+                    ${reviewHtml}
+                `,
+                width: '800px', background: 'rgba(10,18,32,0.95)', color: '#fff', allowOutsideClick: false,
+                confirmButtonText: 'Return to List', confirmButtonColor: '#4f46e5',
+                didOpen: () => {
+                    lucide.createIcons();
+                    if (window.MathJax) window.MathJax.typesetPromise();
+                }
+            }).then(() => {
+                loadQuizzesPage();
+            });
+        }
+
+        async function checkAbandonedExams() {
+            const abandonedExamId = localStorage.getItem('bx_exam_id');
+            if (abandonedExamId && currentUser) {
+                const quizTitle = localStorage.getItem('bx_exam_title');
+                const totalMarks = localStorage.getItem('bx_exam_total');
+                localStorage.removeItem('bx_exam_id'); localStorage.removeItem('bx_exam_title'); localStorage.removeItem('bx_exam_total');
+
+                const userName = currentUser.user_metadata?.first_name ? currentUser.user_metadata.first_name : currentUser.email.split('@')[0];
+
+                await sb.from('quiz_results').insert([{
+                    user_id: currentUser.id, quiz_id: abandonedExamId, student_name: userName,
+                    quiz_title: quizTitle, score: 0, total_score: parseInt(totalMarks)
+                }]);
+
+                Swal.fire({
+                    icon: 'error', title: 'Paper Submitted!',
+                    text: `We detected that you left or refreshed the page during the exam (${quizTitle}). It has been marked as a fail (0).`,
+                    background: 'rgba(10,18,32,0.9)', color: '#fff', confirmButtonColor: '#f43f5e', confirmButtonText: 'Understood',
+                    customClass: { popup: 'font-sans' }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
